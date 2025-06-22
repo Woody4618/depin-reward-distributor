@@ -1,0 +1,246 @@
+{
+  "address": "DGorXzr4L3QetxW6AbD715pt7e5ihU3RXo8Re5D7zNmu",
+  "metadata": {
+    "name": "reward_distributor",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "change_authority",
+      "discriminator": [
+        50,
+        106,
+        66,
+        104,
+        99,
+        118,
+        145,
+        88
+      ],
+      "accounts": [
+        {
+          "name": "reward_account",
+          "writable": true
+        },
+        {
+          "name": "current_authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_authority",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "change_authority_with_device_sig",
+      "discriminator": [
+        241,
+        42,
+        103,
+        225,
+        155,
+        52,
+        24,
+        247
+      ],
+      "accounts": [
+        {
+          "name": "reward_account",
+          "writable": true
+        },
+        {
+          "name": "new_authority",
+          "signer": true
+        },
+        {
+          "name": "instructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_rewards",
+      "discriminator": [
+        4,
+        144,
+        132,
+        71,
+        116,
+        23,
+        151,
+        80
+      ],
+      "accounts": [
+        {
+          "name": "reward_account",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "signer": true
+        },
+        {
+          "name": "oracle"
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "user_token_account",
+          "writable": true
+        },
+        {
+          "name": "treasury_token_account",
+          "writable": true
+        },
+        {
+          "name": "treasury_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "instructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "lifetime_rewards",
+          "type": "u64"
+        },
+        {
+          "name": "_timestamp",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize_reward_account",
+      "discriminator": [
+        63,
+        186,
+        43,
+        118,
+        242,
+        79,
+        158,
+        232
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "reward_account",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "device_pubkey",
+          "type": "pubkey"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "RewardAccount",
+      "discriminator": [
+        225,
+        81,
+        31,
+        253,
+        84,
+        234,
+        171,
+        129
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidSignature",
+      "msg": "Invalid signature"
+    },
+    {
+      "code": 6001,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidRewardAmount",
+      "msg": "Invalid reward amount"
+    },
+    {
+      "code": 6003,
+      "name": "NoRewardsToClaim",
+      "msg": "No rewards to claim"
+    },
+    {
+      "code": 6004,
+      "name": "RewardOverflow",
+      "msg": "Reward overflow"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidInstruction",
+      "msg": "Invalid instruction"
+    }
+  ],
+  "types": [
+    {
+      "name": "RewardAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "device_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "withdraw_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_claimed",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

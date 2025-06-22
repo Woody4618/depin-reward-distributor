@@ -47,3 +47,12 @@ next-env.d.ts
 /anchor/target/sbf-solana-solana
 /anchor/target/test-ledger
 /anchor/target/.rustc_info.json
+
+# sveltekit
+.svelte-kit/
+
+# dotenv
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local

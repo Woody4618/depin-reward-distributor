@@ -1,4 +1,5 @@
 [toolchain]
+anchor_version = "0.31.1"
 package_manager = "yarn"
 
 [features]
@@ -6,7 +7,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-counter = "FqzkXZdwYjurnUKetJCAvaUw5WAqbwzU6gZEwydeEfqS"
+reward_distributor = "DGorXzr4L3QetxW6AbD715pt7e5ihU3RXo8Re5D7zNmu"
 
 [registry]
 url = "https://api.apr.dev"

@@ -1,0 +1,9 @@
+{
+  "devices": {
+    "DEVICE_PUBLIC_KEY_1": {
+      "unclaimedRewards": 0,
+      "lastPingAt": null,
+      "data": []
+    }
+  }
+}

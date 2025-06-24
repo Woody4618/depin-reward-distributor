@@ -242,7 +242,7 @@ function DeviceCard({
         </div>
       )}
       <div className="flex gap-2 mt-2">
-        <Button onClick={() => claimRewardsMutation.mutate()} disabled={claimRewardsMutation.isPending || !hasKeypair}>
+        <Button onClick={() => claimRewardsMutation.mutate()} disabled={claimRewardsMutation.isPending}>
           {claimRewardsMutation.isPending ? 'Claiming...' : 'Claim Rewards'}
         </Button>
         <Button onClick={handlePingOracle} disabled={pingLoading || !hasKeypair} variant="secondary">

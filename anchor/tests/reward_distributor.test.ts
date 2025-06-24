@@ -20,7 +20,6 @@ describe('reward-distributor', () => {
   const oracleKeypair = Keypair.generate()
   const newAuthorityKeypair = Keypair.generate()
   const anotherAuthorityKeypair = Keypair.generate()
-  const rewardAccountKeypair = Keypair.generate()
 
   // Mints and Token Accounts
   let usdcMint: PublicKey
@@ -80,22 +79,30 @@ describe('reward-distributor', () => {
   })
 
   it('Is initialized!', async () => {
+    const [rewardAccountPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from('reward'), deviceKeypair.publicKey.toBuffer()],
+      program.programId,
+    )
+
     await program.methods
       .initializeRewardAccount(deviceKeypair.publicKey)
       .accounts({
-        rewardAccount: rewardAccountKeypair.publicKey,
         payer: wallet.publicKey,
+        devicePubkey: deviceKeypair.publicKey,
       })
-      .signers([rewardAccountKeypair])
       .rpc()
 
-    const account = await program.account.rewardAccount.fetch(rewardAccountKeypair.publicKey)
+    const account = await program.account.rewardAccount.fetch(rewardAccountPda)
     expect(account.devicePubkey.equals(deviceKeypair.publicKey)).toBeTruthy()
     expect(account.withdrawAuthority.equals(wallet.publicKey)).toBeTruthy()
     expect(account.totalClaimed.toNumber()).toBe(0)
   })
 
   it('Changes authority with device signature', async () => {
+    const [rewardAccountPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from('reward'), deviceKeypair.publicKey.toBuffer()],
+      program.programId,
+    )
     const msg = Buffer.from(`I want to claim: ${newAuthorityKeypair.publicKey.toString()}`)
     const signature = nacl.sign.detached(msg, deviceKeypair.secretKey)
 
@@ -108,38 +115,44 @@ describe('reward-distributor', () => {
     await program.methods
       .changeAuthorityWithDeviceSig()
       .accounts({
-        rewardAccount: rewardAccountKeypair.publicKey,
+        rewardAccount: rewardAccountPda,
         newAuthority: newAuthorityKeypair.publicKey,
       })
       .preInstructions([ed25519Instruction])
       .signers([newAuthorityKeypair])
       .rpc()
 
-    const account = await program.account.rewardAccount.fetch(rewardAccountKeypair.publicKey)
+    const account = await program.account.rewardAccount.fetch(rewardAccountPda)
     expect(account.withdrawAuthority.equals(newAuthorityKeypair.publicKey)).toBeTruthy()
   })
 
   it('Changes authority with current authority signature', async () => {
+    const [rewardAccountPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from('reward'), deviceKeypair.publicKey.toBuffer()],
+      program.programId,
+    )
     await program.methods
       .changeAuthority(anotherAuthorityKeypair.publicKey)
       .accounts({
-        rewardAccount: rewardAccountKeypair.publicKey,
+        rewardAccount: rewardAccountPda,
         currentAuthority: newAuthorityKeypair.publicKey,
       })
       .signers([newAuthorityKeypair])
       .rpc()
 
-    const account = await program.account.rewardAccount.fetch(rewardAccountKeypair.publicKey)
+    const account = await program.account.rewardAccount.fetch(rewardAccountPda)
     expect(account.withdrawAuthority.equals(anotherAuthorityKeypair.publicKey)).toBeTruthy()
   })
 
   it('Claims rewards', async () => {
+    const [rewardAccountPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from('reward'), deviceKeypair.publicKey.toBuffer()],
+      program.programId,
+    )
     const lifetimeRewards = new anchor.BN(100 * 10 ** 6) // 100 USDC
     const timestamp = new anchor.BN(Date.now())
 
-    const devicePubkeyBytes = (
-      await program.account.rewardAccount.fetch(rewardAccountKeypair.publicKey)
-    ).devicePubkey.toBuffer()
+    const devicePubkeyBytes = (await program.account.rewardAccount.fetch(rewardAccountPda)).devicePubkey.toBuffer()
     const lifetimeRewardsBytes = lifetimeRewards.toArrayLike(Buffer, 'le', 8)
     const timestampBytes = timestamp.toArrayLike(Buffer, 'le', 8)
     const message = Buffer.concat([devicePubkeyBytes, lifetimeRewardsBytes, timestampBytes])
@@ -158,11 +171,10 @@ describe('reward-distributor', () => {
     await program.methods
       .claimRewards(lifetimeRewards, timestamp)
       .accounts({
-        rewardAccount: rewardAccountKeypair.publicKey,
+        rewardAccount: rewardAccountPda,
         user: wallet.publicKey,
         oracle: oracleKeypair.publicKey,
         mint: usdcMint,
-        userTokenAccount: userTokenAccount,
         treasuryTokenAccount: treasuryTokenAccount,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
@@ -175,7 +187,7 @@ describe('reward-distributor', () => {
     expect(finalUserBalance).toBe(initialUserBalance + BigInt(lifetimeRewards.toNumber()))
     expect(finalTreasuryBalance).toBe(initialTreasuryBalance - BigInt(lifetimeRewards.toNumber()))
 
-    const rewardAccountState = await program.account.rewardAccount.fetch(rewardAccountKeypair.publicKey)
+    const rewardAccountState = await program.account.rewardAccount.fetch(rewardAccountPda)
     expect(rewardAccountState.totalClaimed.toNumber()).toBe(lifetimeRewards.toNumber())
   })
 })

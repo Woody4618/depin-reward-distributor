@@ -67,20 +67,6 @@ app.get('/api/sensor', (req, res) => {
   })
 })
 
-// Mock: Sign and return a claim message (replace with real signing logic)
-app.post('/api/claim', (req, res) => {
-  // TODO: Load device keypair and sign a message
-  // For now, just return a mock signature
-  const message = Buffer.from('mock-message')
-  const mockSecret = Buffer.alloc(64, 1) // Replace with real secret key
-  const signature = nacl.sign.detached(message, mockSecret)
-  res.json({
-    message: message.toString('hex'),
-    signature: bs58.encode(signature),
-    note: 'Replace with real signing and message structure!',
-  })
-})
-
 const deviceKeyPath = path.join(__dirname, 'device-key.json')
 
 app.post('/api/sign-claim', (req, res) => {
@@ -105,6 +91,54 @@ app.post('/api/sign-claim', (req, res) => {
     note: 'Message is devicePubkey+userPubkey as base58 strings, concatenated.',
   })
 })
+
+// --- Automatic sensor reporting to oracle every 5 seconds ---
+const oracleUrl = 'https://d169-2a02-3100-89fe-1b00-f5da-ce49-673-7491.ngrok-free.app/api/ping'
+
+function reportSensorToOracle() {
+  exec('python3 sensor.py', { cwd: __dirname }, (error, stdout, stderr) => {
+    if (error) {
+      console.error('[AUTO] Failed to read sensor:', stderr || error.message)
+      return
+    }
+    const match = stdout.match(/Temperature: \(([-\d.]+)C\) \(([-\d.]+)F\) Humidity: ([-\d.]+)%/)
+    if (!match) {
+      console.error('[AUTO] Could not parse sensor output:', stdout)
+      return
+    }
+    const temperature = parseFloat(match[1])
+    const humidity = parseFloat(match[3])
+    const data = { temperature, humidity }
+    let secretKey
+    try {
+      secretKey = Uint8Array.from(JSON.parse(fs.readFileSync(deviceKeyPath, 'utf8')))
+    } catch {
+      console.error('[AUTO] Failed to load device keypair')
+      return
+    }
+    const keypair = nacl.sign.keyPair.fromSecretKey(secretKey)
+    const message = Buffer.from(JSON.stringify(data))
+    const signature = nacl.sign.detached(message, keypair.secretKey)
+    const signatureBase58 = bs58.encode(signature)
+    fetch(oracleUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        devicePublicKey: bs58.encode(keypair.publicKey),
+        signature: signatureBase58,
+        data,
+      }),
+    })
+      .then((oracleRes) => oracleRes.json())
+      .then((oracleData) => {
+        console.log('[AUTO] Oracle response:', oracleData)
+      })
+      .catch((err) => {
+        console.error('[AUTO] Failed to call oracle:', err.message)
+      })
+  })
+}
+setInterval(reportSensorToOracle, 5000)
 
 const PORT = 3000
 app.listen(PORT, () => {

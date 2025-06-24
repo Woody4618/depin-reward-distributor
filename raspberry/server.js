@@ -4,8 +4,10 @@ const path = require('path')
 const nacl = require('tweetnacl')
 const bs58 = require('bs58')
 const { exec } = require('child_process')
+const cors = require('cors')
 
 const app = express()
+app.use(cors())
 app.use(express.json())
 
 // Serve a simple UI
@@ -76,6 +78,31 @@ app.post('/api/claim', (req, res) => {
     message: message.toString('hex'),
     signature: bs58.encode(signature),
     note: 'Replace with real signing and message structure!',
+  })
+})
+
+const deviceKeyPath = path.join(__dirname, 'device-key.json')
+
+app.post('/api/sign-claim', (req, res) => {
+  const { userPublicKey } = req.body
+  if (!userPublicKey) {
+    return res.status(400).json({ error: 'Missing userPublicKey' })
+  }
+  let secretKey
+  try {
+    secretKey = Uint8Array.from(JSON.parse(fs.readFileSync(deviceKeyPath, 'utf8')))
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to load device keypair' })
+  }
+  const keypair = nacl.sign.keyPair.fromSecretKey(secretKey)
+  // Message: devicePubkey + userPubkey (both as base58 strings, concatenated)
+  const message = Buffer.from(keypair.publicKey.toString() + userPublicKey)
+  const signature = nacl.sign.detached(message, keypair.secretKey)
+  res.json({
+    devicePublicKey: bs58.encode(keypair.publicKey),
+    signature: bs58.encode(signature),
+    message: message.toString('base64'),
+    note: 'Message is devicePubkey+userPubkey as base58 strings, concatenated.',
   })
 })
 

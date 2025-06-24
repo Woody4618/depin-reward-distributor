@@ -5,7 +5,7 @@ import { useMutation } from '@tanstack/react-query'
 import { AppHero } from '../app-hero'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Keypair, PublicKey } from '@solana/web3.js'
+import { Ed25519Program, Keypair, PublicKey } from '@solana/web3.js'
 import nacl from 'tweetnacl'
 import bs58 from 'bs58'
 import { toast } from 'sonner'
@@ -17,6 +17,8 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { saveDeviceKeypair, importDeviceKeypair, exportDeviceKeypair } from '@/lib/device-keypair-storage'
+import { TransactionInstruction } from '@solana/web3.js'
+import * as anchor from '@coral-xyz/anchor'
 
 // Helper function to call the ping API
 async function sendPing({ deviceKeypair, data }: { deviceKeypair: Keypair; data: any }) {
@@ -283,6 +285,8 @@ export function DeviceCreateFeature() {
   const [alreadyExists, setAlreadyExists] = useState(false)
   const { publicKey } = useWallet()
   const router = useRouter()
+  const [piAddress, setPiAddress] = useState('http://bar9.local:3000')
+  const [claimResult, setClaimResult] = useState<any>(null)
 
   // Save to localStorage on creation
   useEffect(() => {
@@ -437,6 +441,117 @@ export function DeviceCreateFeature() {
               </Button>
             )}
           </div>
+        </div>
+        {/* Claim Device via Pi section */}
+        <div className="p-4 border rounded-md space-y-4">
+          <h2 className="text-lg font-bold">3. Claim Device via Raspberry Pi</h2>
+          <p className="text-sm text-gray-500">
+            If you have a real device running the Pi server, you can claim it here.
+          </p>
+          <Label>Pi Server Address</Label>
+          <Input
+            value={piAddress}
+            onChange={(e) => setPiAddress(e.target.value)}
+            placeholder="http://bar9.local:3000"
+          />
+          <Button
+            className="mt-2"
+            onClick={async () => {
+              setClaimResult(null)
+              if (!publicKey) {
+                toast.error('Connect your wallet first!')
+                return
+              }
+              try {
+                const res = await fetch(`${piAddress}/api/sign-claim`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ userPublicKey: publicKey.toBase58() }),
+                })
+                const data = await res.json()
+                setClaimResult(data)
+                if (data.error) {
+                  toast.error(data.error)
+                } else {
+                  toast.success('Device claim signature received!')
+                }
+              } catch (e) {
+                toast.error('Failed to contact Pi server')
+              }
+            }}
+          >
+            Claim Device via Pi
+          </Button>
+          {claimResult && (
+            <div className="mt-2 bg-gray-100 p-2 rounded text-xs">
+              <pre>{JSON.stringify(claimResult, null, 2)}</pre>
+              {claimResult.devicePublicKey && claimResult.signature && claimResult.message && !claimResult.error && (
+                <Button
+                  className="mt-2"
+                  onClick={async () => {
+                    try {
+                      if (!publicKey || !program) {
+                        toast.error('Wallet or program not available')
+                        return
+                      }
+                      // Build Ed25519 signature verification instruction
+                      const devicePubkey = new PublicKey(claimResult.devicePublicKey)
+                      const signature = bs58.decode(claimResult.signature)
+                      const message = Buffer.from(claimResult.message, 'base64')
+                      const ed25519Ix = Ed25519Program.createInstructionWithPublicKey({
+                        publicKey: devicePubkey.toBytes(),
+                        message,
+                        signature,
+                      })
+                      // Find reward account PDA
+                      const [rewardAccount] = PublicKey.findProgramAddressSync(
+                        [Buffer.from('reward'), devicePubkey.toBuffer()],
+                        program.programId,
+                      )
+                      // Check if reward account exists
+                      let rewardAccountExists = true
+                      try {
+                        await program.account.rewardAccount.fetch(rewardAccount)
+                      } catch (e) {
+                        rewardAccountExists = false
+                      }
+                      const instructions = []
+                      if (!rewardAccountExists) {
+                        const initIx = await program.methods
+                          .initializeRewardAccount(devicePubkey)
+                          .accounts({
+                            rewardAccount,
+                            payer: publicKey,
+                            devicePubkey,
+                            systemProgram: anchor.web3.SystemProgram.programId,
+                          })
+                          .instruction()
+                        instructions.push(initIx)
+                      }
+                      instructions.push(ed25519Ix)
+                      const changeAuthIx = await program.methods
+                        .changeAuthorityWithDeviceSig()
+                        .accounts({
+                          rewardAccount,
+                          newAuthority: publicKey,
+                          instructions: anchor.web3.SYSVAR_INSTRUCTIONS_PUBKEY,
+                        })
+                        .instruction()
+                      instructions.push(changeAuthIx)
+                      // Send transaction
+                      const tx = new anchor.web3.Transaction().add(...instructions)
+                      const txid = await program.provider.sendAndConfirm(tx, [])
+                      toast.success('Ownership claimed! Tx: ' + txid)
+                    } catch (err: any) {
+                      toast.error('Failed to claim ownership: ' + (err.message || err))
+                    }
+                  }}
+                >
+                  Claim Ownership On-Chain
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

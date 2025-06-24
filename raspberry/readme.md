@@ -1,4 +1,3 @@
-
 Copy the files to the Raspberry Pi
 
 ```bash
@@ -13,10 +12,10 @@ sudo apt install nodejs npm
 node -v
 npm -v
 cd ~/raspberry
-npm install express tweetnacl bs58@5
+npm install express tweetnacl bs58@5 cors
 ```
 
-Start the webserver to claim the device: 
+Start the webserver to claim the device:
 
 ```bash
 node server.js

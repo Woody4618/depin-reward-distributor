@@ -1,5 +1,5 @@
-import RewardDistributorFeature from '@/components/reward-distributor/reward-distributor-feature'
+import { DeviceCreateFeature } from '@/components/reward-distributor/reward-distributor-ui'
 
 export default function Page() {
-  return <RewardDistributorFeature />
+  return <DeviceCreateFeature />
 }

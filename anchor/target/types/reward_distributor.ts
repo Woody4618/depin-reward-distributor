@@ -226,8 +226,32 @@ export type RewardDistributor = {
         },
         {
           "name": "rewardAccount",
+          "docs": [
+            "The device pubkey must be passed as an instruction argument and as a struct field for Anchor PDA constraints"
+          ],
           "writable": true,
-          "signer": true
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  119,
+                  97,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "devicePubkey"
+              }
+            ]
+          }
+        },
+        {
+          "name": "devicePubkey"
         },
         {
           "name": "systemProgram",

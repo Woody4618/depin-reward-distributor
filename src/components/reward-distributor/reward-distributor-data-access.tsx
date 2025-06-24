@@ -37,12 +37,21 @@ export function useRewardDistributorProgram() {
 
   const initializeRewardAccount = useMutation({
     mutationKey: ['rewardDistributor', 'initialize', { cluster }],
-    mutationFn: ({ keypair, devicePubkey }: { keypair: Keypair; devicePubkey: PublicKey }) =>
-      program.methods
+    mutationFn: async ({ devicePubkey }: { devicePubkey: PublicKey }) => {
+      const [rewardAccountPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from('reward'), devicePubkey.toBuffer()],
+        program.programId,
+      )
+      return program.methods
         .initializeRewardAccount(devicePubkey)
-        .accounts({ rewardAccount: keypair.publicKey })
-        .signers([keypair])
-        .rpc(),
+        .accounts({
+          rewardAccount: rewardAccountPda,
+          payer: provider.wallet.publicKey,
+          devicePubkey,
+          systemProgram: PublicKey.default,
+        })
+        .rpc()
+    },
     onSuccess: async (signature) => {
       transactionToast(signature)
       await accounts.refetch()

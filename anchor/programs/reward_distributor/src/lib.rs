@@ -121,12 +121,17 @@ pub struct InitializeRewardAccount<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
 
+    /// The device pubkey must be passed as an instruction argument and as a struct field for Anchor PDA constraints
     #[account(
         init,
+        seeds = [b"reward", device_pubkey.key().as_ref()],
+        bump,
         space = 8 + RewardAccount::INIT_SPACE,
         payer = payer,
     )]
     pub reward_account: Account<'info, RewardAccount>,
+    /// CHECK: device_pubkey is only used for PDA derivation and is not accessed as an account
+    pub device_pubkey: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 

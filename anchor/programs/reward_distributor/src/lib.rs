@@ -1,12 +1,17 @@
 #![allow(clippy::result_large_err)]
 
-use anchor_lang::{prelude::*, solana_program};
-use anchor_spl::token::{self, Transfer};
-use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
-use solana_program::sysvar::{
+use anchor_lang::solana_program::sysvar::{
     instructions::{load_current_index_checked, load_instruction_at_checked},
     Sysvar,
 };
+use anchor_lang::{
+    prelude::*,
+    solana_program::{ed25519_program::ID as ED25519_ID, instruction::Instruction},
+};
+use anchor_spl::token::{self, Transfer};
+use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
+use std::str;
+use std::str::FromStr;
 
 declare_id!("DGorXzr4L3QetxW6AbD715pt7e5ihU3RXo8Re5D7zNmu");
 
@@ -35,14 +40,11 @@ pub mod reward_distributor {
         let ed25519_ix_index = current_ix_index - 1;
         let ed25519_ix = load_instruction_at_checked(ed25519_ix_index, ixs)?;
 
-        require_keys_eq!(
-            ed25519_ix.program_id,
-            solana_program::ed25519_program::ID,
-            ErrorCode::InvalidInstruction
-        );
-
-        // In a real implementation, you would parse ed25519_ix.data carefully
-        // to match the oracle pubkey, message, and signature.
+        // Use the robust helper for Ed25519 verification
+        let expected_oracle_pubkey =
+            Pubkey::from_str("oraXrapkbpe6pCVJ2sm3MRZAdyemtWXyGg4W6mGarjL").unwrap();
+        let message = verify_ed25519_ix(&ed25519_ix, expected_oracle_pubkey.as_ref())?;
+        msg!("Ed25519 message extracted: {:?}", &message);
 
         let reward_account = &mut ctx.accounts.reward_account;
         let rewards_to_claim = lifetime_rewards
@@ -94,12 +96,9 @@ pub mod reward_distributor {
 
         require_keys_eq!(
             ed25519_ix.program_id,
-            solana_program::ed25519_program::ID,
+            ED25519_ID,
             ErrorCode::InvalidInstruction
         );
-
-        // In a real implementation, you would parse ed25519_ix.data carefully
-        // to match the device pubkey, message, and signature.
 
         let reward_account = &mut ctx.accounts.reward_account;
         let new_authority = &ctx.accounts.new_authority;
@@ -167,7 +166,7 @@ pub struct ClaimRewards<'info> {
     pub associated_token_program: Program<'info, anchor_spl::associated_token::AssociatedToken>,
     pub system_program: Program<'info, System>,
     /// CHECK: Instructions sysvar
-    #[account(address = solana_program::sysvar::instructions::ID)]
+    #[account(address = anchor_lang::solana_program::sysvar::instructions::ID)]
     pub instructions: UncheckedAccount<'info>,
 }
 
@@ -184,7 +183,7 @@ pub struct ChangeAuthorityWithDeviceSig<'info> {
     pub reward_account: Account<'info, RewardAccount>,
     pub new_authority: Signer<'info>,
     /// CHECK: Instructions sysvar
-    #[account(address = solana_program::sysvar::instructions::ID)]
+    #[account(address = anchor_lang::solana_program::sysvar::instructions::ID)]
     pub instructions: UncheckedAccount<'info>,
 }
 
@@ -202,4 +201,77 @@ pub enum ErrorCode {
     RewardOverflow,
     #[msg("Invalid instruction")]
     InvalidInstruction,
+}
+
+/// Verify Ed25519Program instruction and get the data from it
+fn verify_ed25519_ix(ix: &Instruction, pubkey: &[u8]) -> Result<Vec<u8>> {
+    msg!("verify_ed25519_ix: program_id = {}", ix.program_id);
+    if ix.program_id != ED25519_ID {
+        msg!("program_id mismatch");
+        return Err(error!(ErrorCode::InvalidInstruction));
+    }
+    check_ed25519_data(&ix.data, pubkey)
+}
+
+/// Verify serialized Ed25519Program instruction data
+fn check_ed25519_data(data: &[u8], pubkey: &[u8]) -> Result<Vec<u8>> {
+    // According to this layout used by the Ed25519Program
+    // https://github.com/solana-labs/solana-web3.js/blob/master/src/ed25519-program.ts#L33
+
+    let num_signatures = &[data[0]]; // Byte  0
+    let padding = &[data[1]]; // Byte  1
+    let signature_offset = &data[2..=3]; // Bytes 2,3
+    let signature_instruction_index = &data[4..=5]; // Bytes 4,5
+    let public_key_offset = &data[6..=7]; // Bytes 6,7
+    let public_key_instruction_index = &data[8..=9]; // Bytes 8,9
+    let message_data_offset = u16::from_le_bytes(data[10..=11].try_into().unwrap()) as usize;
+    let message_data_size = u16::from_le_bytes(data[12..=13].try_into().unwrap()) as usize;
+    let message_instruction_index = &data[14..=15]; // Bytes 14,15
+
+    let data_pubkey = &data[16..16 + 32]; // Bytes 16..16+32
+    let data_msg = &data[message_data_offset..(message_data_offset + message_data_size)];
+
+    let exp_public_key_offset: u16 = 16; // 2*u8 + 7*u16
+    let exp_signature_offset: u16 = exp_public_key_offset + pubkey.len() as u16;
+    let exp_num_signatures: u8 = 1;
+
+    msg!("num_signatures: {:?}", num_signatures);
+    msg!("padding: {:?}", padding);
+    msg!("signature_offset: {:?}", signature_offset);
+    msg!(
+        "signature_instruction_index: {:?}",
+        signature_instruction_index
+    );
+    msg!("public_key_offset: {:?}", public_key_offset);
+    msg!(
+        "public_key_instruction_index: {:?}",
+        public_key_instruction_index
+    );
+    msg!("message_data_offset: {}", message_data_offset);
+    msg!("message_data_size: {}", message_data_size);
+    msg!("message_instruction_index: {:?}", message_instruction_index);
+    msg!("data_pubkey: {:?}", data_pubkey);
+    msg!("expected_pubkey: {:?}", pubkey);
+    msg!("data.len(): {}", data.len());
+
+    // Header
+    if num_signatures != &[exp_num_signatures]
+        || padding != &[0u8]
+        || signature_offset != exp_signature_offset.to_le_bytes()
+        || signature_instruction_index != u16::MAX.to_le_bytes()
+        || public_key_offset != exp_public_key_offset.to_le_bytes()
+        || public_key_instruction_index != u16::MAX.to_le_bytes()
+        || message_instruction_index != u16::MAX.to_le_bytes()
+    {
+        msg!("Header check failed");
+        return Err(error!(ErrorCode::InvalidInstruction));
+    }
+
+    // Arguments
+    if data_pubkey != pubkey {
+        msg!("Pubkey check failed");
+        return Err(error!(ErrorCode::InvalidInstruction));
+    }
+
+    Ok(data_msg.to_vec())
 }

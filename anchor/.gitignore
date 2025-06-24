@@ -6,6 +6,7 @@ target/release
 target/sbf-solana-solana
 target/sbpf-solana-solana
 target/test-ledger
+target/rust-analyser
 target/.rustc_info.json
 **/*.rs.bk
 node_modules

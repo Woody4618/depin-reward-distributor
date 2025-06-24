@@ -39,6 +39,7 @@ function DeviceCard({
   )
   const [deviceDataLoading, setDeviceDataLoading] = useState(false)
   const [deviceDataError, setDeviceDataError] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
 
   // Fetch oracle rewards for this device
   const fetchOracleRewards = async (devicePubkey: string) => {
@@ -197,6 +198,15 @@ function DeviceCard({
     }
   }
 
+  // Manual refresh handler
+  const handleRefresh = async () => {
+    if (!account.account.devicePubkey) return
+    setRefreshing(true)
+    await fetchOracleRewards(account.account.devicePubkey.toBase58())
+    await accountQuery.refetch()
+    setRefreshing(false)
+  }
+
   return (
     <li className="p-4 border rounded-md space-y-2">
       <div>
@@ -212,7 +222,7 @@ function DeviceCard({
       </div>
       <div>
         <span className="font-semibold">Total Claimed: </span>
-        {account.account.totalClaimed.toString()}
+        {accountQuery.data ? accountQuery.data.totalClaimed.toString() : '...'}
       </div>
       <div>
         <span className="font-semibold">Claimable Rewards: </span>
@@ -223,6 +233,16 @@ function DeviceCard({
         ) : (
           <span>{claimable !== null ? claimable : 'N/A'}</span>
         )}
+        <Button
+          className="ml-2 text-xs px-2 py-1 h-auto"
+          variant="outline"
+          onClick={handleRefresh}
+          disabled={oracleLoading || refreshing || accountQuery.isLoading || accountQuery.isFetching}
+        >
+          {refreshing || oracleLoading || accountQuery.isLoading || accountQuery.isFetching
+            ? 'Refreshing...'
+            : 'Refresh'}
+        </Button>
       </div>
       {!hasKeypair && (
         <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 rounded mt-2">

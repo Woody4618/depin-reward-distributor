@@ -17,7 +17,10 @@ describe('reward-distributor', () => {
 
   // Keypairs
   const deviceKeypair = Keypair.generate()
-  const oracleKeypair = Keypair.generate()
+  // Load the oracle keypair from secret key file (must match oraXrapkbpe6pCVJ2sm3MRZAdyemtWXyGg4W6mGarjL)
+  const ORACLE_KEYPAIR_PATH = path.join(__dirname, '../../oraXrapkbpe6pCVJ2sm3MRZAdyemtWXyGg4W6mGarjL.json')
+  const oracleSecret = JSON.parse(fs.readFileSync(ORACLE_KEYPAIR_PATH, 'utf-8'))
+  const oracleKeypair = Keypair.fromSecretKey(new Uint8Array(oracleSecret))
   const newAuthorityKeypair = Keypair.generate()
   const anotherAuthorityKeypair = Keypair.generate()
 
@@ -179,7 +182,9 @@ describe('reward-distributor', () => {
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .preInstructions([ed25519Instruction])
-      .rpc()
+      .rpc({
+        skipPreflight: true,
+      })
 
     const finalUserBalance = (await getAccount(provider.connection, userTokenAccount)).amount
     const finalTreasuryBalance = (await getAccount(provider.connection, treasuryTokenAccount)).amount

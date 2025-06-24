@@ -16,11 +16,7 @@ import { Label } from '@/components/ui/label'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import {
-  saveDeviceKeypair,
-  importDeviceKeypair,
-  exportDeviceKeypair,
-} from '@/lib/device-keypair-storage'
+import { saveDeviceKeypair, importDeviceKeypair, exportDeviceKeypair } from '@/lib/device-keypair-storage'
 
 // Helper function to call the ping API
 async function sendPing({ deviceKeypair, data }: { deviceKeypair: Keypair; data: any }) {
@@ -293,7 +289,6 @@ export function DeviceCreateFeature() {
     if (deviceKeypair) {
       saveDeviceKeypair(deviceKeypair.publicKey.toBase58(), exportDeviceKeypair(deviceKeypair))
     }
-
   }, [deviceKeypair])
 
   // Check if reward account already exists for this device

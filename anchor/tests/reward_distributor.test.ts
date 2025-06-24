@@ -46,8 +46,8 @@ describe('reward-distributor', () => {
       wallet.publicKey,
       wallet.publicKey,
       6,
-      usdcMintKeypair
-    );
+      usdcMintKeypair,
+    )
 
     // Create User's Associated Token Account
     const userAta = await getOrCreateAssociatedTokenAccount(

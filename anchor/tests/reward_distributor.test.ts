@@ -4,6 +4,8 @@ import { RewardDistributor } from '../target/types/reward_distributor'
 import { Keypair, LAMPORTS_PER_SOL, PublicKey, Ed25519Program } from '@solana/web3.js'
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo, getAccount, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import nacl from 'tweetnacl'
+import fs from 'fs'
+import path from 'path'
 
 describe('reward-distributor', () => {
   // Configure the client to use the local cluster.
@@ -27,13 +29,25 @@ describe('reward-distributor', () => {
 
   const [treasuryAuthorityPDA] = PublicKey.findProgramAddressSync([Buffer.from('treasury')], program.programId)
 
+  // Load the persistent mint keypair
+  const MINT_KEYPAIR_PATH = path.join(__dirname, '../../usdK7BPzzm9PvoUKrTYdshcv7u5AiVaWcfRv3pFyPAE.json')
+  const mintSecret = JSON.parse(fs.readFileSync(MINT_KEYPAIR_PATH, 'utf-8'))
+  const usdcMintKeypair = Keypair.fromSecretKey(new Uint8Array(mintSecret))
+
   beforeAll(async () => {
     // Airdrop SOL to the new authorities
     await provider.connection.requestAirdrop(newAuthorityKeypair.publicKey, LAMPORTS_PER_SOL)
     await provider.connection.requestAirdrop(anotherAuthorityKeypair.publicKey, LAMPORTS_PER_SOL)
 
     // Create USDC Mint
-    usdcMint = await createMint(provider.connection, wallet.payer, wallet.publicKey, null, 6)
+    usdcMint = await createMint(
+      provider.connection,
+      wallet.payer,
+      wallet.publicKey,
+      wallet.publicKey,
+      6,
+      usdcMintKeypair
+    );
 
     // Create User's Associated Token Account
     const userAta = await getOrCreateAssociatedTokenAccount(

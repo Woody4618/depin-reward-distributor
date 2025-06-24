@@ -6,10 +6,16 @@ import fs from 'fs/promises'
 import path from 'path'
 
 // Define the structure of our database
+interface PingData {
+  temperature: number
+  humidity: number
+  receivedAt: string
+}
+
 interface DeviceData {
   unclaimedRewards: number
   lastPingAt: string | null
-  data: any[]
+  data: PingData[]
 }
 
 interface Database {
@@ -26,7 +32,7 @@ async function readDb(): Promise<Database> {
   try {
     const data = await fs.readFile(DB_PATH, 'utf-8')
     return JSON.parse(data)
-  } catch (error) {
+  } catch {
     // If the file doesn't exist or is invalid, return a default structure
     return { devices: {} }
   }
@@ -64,7 +70,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    const oracleKeypair = web3.Keypair.fromSecretKey(bs58.decode(oracleSecretKey))
+    let secretKeyBytes: Uint8Array
+    try {
+      // Handle both formats: JSON array string and Base58 string
+      if (oracleSecretKey.startsWith('[') && oracleSecretKey.endsWith(']')) {
+        secretKeyBytes = Uint8Array.from(JSON.parse(oracleSecretKey))
+      } else {
+        secretKeyBytes = bs58.decode(oracleSecretKey)
+      }
+    } catch (e) {
+      console.error('Failed to parse ORACLE_SECRET_KEY. Make sure it is a valid JSON array or a Base58 string.', e)
+      return NextResponse.json({ error: 'Invalid secret key format in environment variable' }, { status: 500 })
+    }
+
+    const oracleKeypair = web3.Keypair.fromSecretKey(secretKeyBytes)
 
     // 4. Construct the message buffer exactly as the on-chain program expects
     const devicePubkeyBytes = new web3.PublicKey(devicePublicKey).toBuffer()

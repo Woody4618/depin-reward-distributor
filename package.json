@@ -11,6 +11,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "next lint",
+    "setup:localnet": "ts-node scripts/setup.ts",
     "start": "next start"
   },
   "description": "Next.js, Tailwind, @solana/web3.js, Wallet Adapter, Anchor Counter program",
@@ -54,6 +55,7 @@
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.10",
     "@types/bn.js": "^5.2.0",
+    "@types/bs58": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.3",
     "@types/react": "^19.1.8",
@@ -64,6 +66,7 @@
     "prettier": "^3.5.3",
     "tailwindcss": "^4.1.10",
     "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
     "tweetnacl": "^1.0.3",
     "typescript": "^5.8.3"
   }

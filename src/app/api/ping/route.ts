@@ -6,10 +6,15 @@ import fs from 'fs/promises'
 import path from 'path'
 
 // Define the structure of our database
+interface PingData {
+  temperature: number
+  humidity: number
+}
+
 interface DeviceData {
   unclaimedRewards: number
   lastPingAt: string | null
-  data: any[]
+  data: (PingData & { receivedAt: string })[]
 }
 
 interface Database {
@@ -26,7 +31,7 @@ async function readDb(): Promise<Database> {
   try {
     const data = await fs.readFile(DB_PATH, 'utf-8')
     return JSON.parse(data)
-  } catch (error) {
+  } catch {
     // If the file doesn't exist or is invalid, return a default structure
     return { devices: {} }
   }
@@ -72,7 +77,7 @@ export async function POST(req: NextRequest) {
     // For each valid ping, grant a small reward. This is a simple starting point.
     device.unclaimedRewards += 1
     device.lastPingAt = new Date().toISOString()
-    device.data.push({ ...data, receivedAt: new Date().toISOString() })
+    device.data.push({ ...(data as PingData), receivedAt: new Date().toISOString() })
 
     await writeDb(db)
 

@@ -4,6 +4,327 @@
       "unclaimedRewards": 0,
       "lastPingAt": null,
       "data": []
+    },
+    "BJxDYai4RhREHUAwrRLove2RsjJoaAZjVEPL8WUshp9o": {
+      "unclaimedRewards": 4,
+      "lastPingAt": "2025-06-22T17:16:56.073Z",
+      "data": [
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T17:16:41.976Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T17:16:44.289Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T17:16:55.672Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T17:16:56.073Z"
+        }
+      ]
+    },
+    "GpoWCRF4xzZcQ9F2g286WBcvJBDkqiho8ab3F7PFDqzK": {
+      "unclaimedRewards": 2,
+      "lastPingAt": "2025-06-22T21:46:24.147Z",
+      "data": [
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:46:18.339Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:46:24.147Z"
+        }
+      ]
+    },
+    "8Jvp8dQyzMJgnmUC4aSJa5pU9LLMxJY9r8uqHj6qirJ6": {
+      "unclaimedRewards": 4,
+      "lastPingAt": "2025-06-22T21:46:42.188Z",
+      "data": [
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:46:39.097Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:46:40.217Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:46:41.613Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:46:42.188Z"
+        }
+      ]
+    },
+    "398bEdjXqdAPaM6pUor67ZzQaAiAo1fZLhQUJUT9Kw88": {
+      "unclaimedRewards": 4,
+      "lastPingAt": "2025-06-22T21:49:07.610Z",
+      "data": [
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:49:04.441Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:49:06.013Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:49:06.777Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:49:07.610Z"
+        }
+      ]
+    },
+    "DjP3sr3AgSEwibHQCPzpy4BWVnhqaisdM8H5C4C9q8Do": {
+      "unclaimedRewards": 0,
+      "lastPingAt": "2025-06-22T21:51:16.695Z",
+      "data": [
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:51:14.536Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:51:15.402Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:51:16.112Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:51:16.364Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:51:16.695Z"
+        }
+      ]
+    },
+    "3JrvV1D73QJmsRtHYu7RKRf4hUMxQg56nNDeJeGTbFFZ": {
+      "unclaimedRewards": 0,
+      "lastPingAt": "2025-06-22T21:52:12.605Z",
+      "data": [
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:52:12.217Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:52:12.605Z"
+        }
+      ]
+    },
+    "HYfet3fRKuR4WqS9yAv3Yb5tHUH4viVLfpUqB3vho5Tz": {
+      "unclaimedRewards": 0,
+      "lastPingAt": "2025-06-22T21:55:03.263Z",
+      "data": [
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:54:01.641Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:54:02.258Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:54:02.597Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:55:01.176Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:55:01.979Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:55:02.551Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:55:03.263Z"
+        }
+      ]
+    },
+    "ARVPxJXaTBFyhAjhsiQY8dfyjsxGLM8ocVLtFqSiuFQL": {
+      "unclaimedRewards": 0,
+      "lastPingAt": "2025-06-22T21:56:24.958Z",
+      "data": [
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:56:22.320Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:56:23.180Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:56:23.994Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:56:24.399Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:56:24.738Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:56:24.958Z"
+        }
+      ]
+    },
+    "5y9X2aCtdGUQmU3vuZwnQvA6dSKS7YofK2SRE1bK17PP": {
+      "unclaimedRewards": 0,
+      "lastPingAt": "2025-06-22T21:58:36.165Z",
+      "data": [
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:58:34.653Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:58:35.063Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:58:35.494Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:58:35.679Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:58:36.024Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-22T21:58:36.165Z"
+        }
+      ]
+    },
+    "8h9ib5s5iYjGTLNrsfgK2UGvpAP9eGVMrudSEZ6whjuy": {
+      "unclaimedRewards": 0,
+      "lastPingAt": "2025-06-24T09:06:20.348Z",
+      "data": [
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-24T09:06:18.524Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-24T09:06:19.825Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-24T09:06:20.348Z"
+        }
+      ]
+    },
+    "J6oUugkCHBPNWG1PGSibsGZWBcKFSUcMZQ6tuz4cDv7h": {
+      "unclaimedRewards": 0,
+      "lastPingAt": "2025-06-24T09:13:45.802Z",
+      "data": [
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-24T09:13:43.406Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-24T09:13:44.069Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-24T09:13:44.570Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-24T09:13:44.940Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-24T09:13:45.148Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-24T09:13:45.514Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-24T09:13:45.661Z"
+        },
+        {
+          "temperature": 25.5,
+          "humidity": 45.2,
+          "receivedAt": "2025-06-24T09:13:45.802Z"
+        }
+      ]
     }
   }
 }

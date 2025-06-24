@@ -134,14 +134,17 @@ pub struct InitializeRewardAccount<'info> {
 pub struct ClaimRewards<'info> {
     #[account(mut)]
     pub reward_account: Account<'info, RewardAccount>,
+    #[account(mut)]
     pub user: Signer<'info>,
     /// CHECK: This is the oracle's account. We only check its address.
     pub oracle: AccountInfo<'info>,
     pub mint: InterfaceAccount<'info, Mint>,
     #[account(
-        mut,
-        constraint = user_token_account.owner == user.key(),
-        constraint = user_token_account.mint == mint.key(),
+        init_if_needed,
+        payer = user,
+        associated_token::mint = mint,
+        associated_token::authority = user,
+        associated_token::token_program = token_program,
     )]
     pub user_token_account: InterfaceAccount<'info, TokenAccount>,
     #[account(
@@ -156,6 +159,8 @@ pub struct ClaimRewards<'info> {
     )]
     pub treasury_authority: AccountInfo<'info>,
     pub token_program: Interface<'info, TokenInterface>,
+    pub associated_token_program: Program<'info, anchor_spl::associated_token::AssociatedToken>,
+    pub system_program: Program<'info, System>,
     /// CHECK: Instructions sysvar
     #[account(address = solana_program::sysvar::instructions::ID)]
     pub instructions: UncheckedAccount<'info>,

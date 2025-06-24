@@ -97,8 +97,7 @@ export async function POST(req: NextRequest) {
     // 5. Sign the message with the oracle's key
     const signature = nacl.sign.detached(message, oracleKeypair.secretKey)
 
-    // IMPORTANT: Reset unclaimed rewards to prevent double-claiming
-    device.unclaimedRewards = 0
+
     await writeDb(db)
 
     // 6. Return the signature and other necessary data

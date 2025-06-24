@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AppHero } from '../app-hero'
 import { Button } from '@/components/ui/button'
@@ -39,6 +39,7 @@ async function sendPing({ deviceKeypair, data }: { deviceKeypair: Keypair; data:
 export function RewardDistributorUi() {
   const [deviceKeypair, setDeviceKeypair] = useState<Keypair | null>(null)
   const { accounts, initializeRewardAccount } = useRewardDistributorProgram()
+  const [lastPingedDevice, setLastPingedDevice] = useState<string | null>(null)
 
   const pingMutation = useMutation({
     mutationKey: ['ping-api'],
@@ -50,6 +51,7 @@ export function RewardDistributorUi() {
     },
     onSuccess: (data) => {
       toast.success(data.message || 'Ping successful!')
+      if (deviceKeypair) setLastPingedDevice(deviceKeypair.publicKey.toBase58())
     },
     onError: (err: Error) => {
       toast.error(err.message || 'An error occurred')
@@ -126,7 +128,11 @@ export function RewardDistributorUi() {
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {accounts.data?.map((account) => (
-              <RewardAccountCard key={account.publicKey.toBase58()} account={account.publicKey} />
+              <RewardAccountCard
+                key={account.publicKey.toBase58()}
+                account={account.publicKey}
+                pingedDevicePubkey={lastPingedDevice}
+              />
             ))}
           </div>
         </div>
@@ -135,8 +141,75 @@ export function RewardDistributorUi() {
   )
 }
 
-function RewardAccountCard({ account }: { account: PublicKey }) {
+function RewardAccountCard({ account, pingedDevicePubkey }: { account: PublicKey; pingedDevicePubkey?: string }) {
   const { accountQuery, claimRewardsMutation } = useRewardDistributorProgramAccount({ account })
+  const [oracleLifetimeRewards, setOracleLifetimeRewards] = useState<null | number>(null)
+  const [oracleLoading, setOracleLoading] = useState(false)
+  const [oracleError, setOracleError] = useState<string | null>(null)
+  const [refreshCountdown, setRefreshCountdown] = useState(10)
+
+  // Refetch function for parent to call after a ping
+  const refetchOracle = async (devicePubkey: string) => {
+    setOracleLoading(true)
+    setOracleError(null)
+    try {
+      const res = await fetch('/api/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ devicePublicKey: devicePubkey }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        setOracleError(err.error || 'Failed to fetch oracle rewards')
+        setOracleLifetimeRewards(null)
+      } else {
+        const data = await res.json()
+        setOracleLifetimeRewards(Number(data.lifetimeRewards))
+      }
+    } catch (e) {
+      setOracleError('Failed to fetch oracle rewards')
+      setOracleLifetimeRewards(null)
+    } finally {
+      setOracleLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout
+    let countdownInterval: NodeJS.Timeout
+    if (accountQuery.data) {
+      const devicePubkey = accountQuery.data.devicePubkey.toBase58()
+      refetchOracle(devicePubkey)
+      setRefreshCountdown(10)
+      // Poll every 10 seconds
+      interval = setInterval(() => {
+        refetchOracle(devicePubkey)
+        setRefreshCountdown(10)
+      }, 10000)
+      // Countdown timer
+      countdownInterval = setInterval(() => {
+        setRefreshCountdown((prev) => (prev > 0 ? prev - 1 : 0))
+      }, 1000)
+    }
+    return () => {
+      if (interval) clearInterval(interval)
+      if (countdownInterval) clearInterval(countdownInterval)
+    }
+  }, [accountQuery.data])
+
+  // Refetch immediately if this device was just pinged
+  useEffect(() => {
+    if (pingedDevicePubkey && accountQuery.data && pingedDevicePubkey === accountQuery.data.devicePubkey.toBase58()) {
+      refetchOracle(pingedDevicePubkey)
+      setRefreshCountdown(10)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pingedDevicePubkey])
+
+  let claimable = null
+  if (oracleLifetimeRewards !== null && accountQuery.data) {
+    claimable = Math.max(0, oracleLifetimeRewards - Number(accountQuery.data.totalClaimed))
+  }
 
   return (
     <div className="p-4 border rounded-md space-y-3">
@@ -156,6 +229,27 @@ function RewardAccountCard({ account }: { account: PublicKey }) {
           <div>
             <span className="font-semibold">Total Claimed: </span>
             <span>{accountQuery.data.totalClaimed.toString()}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">Claimable: </span>
+            {oracleLoading ? (
+              <span>Loading...</span>
+            ) : oracleError ? (
+              <span className="text-red-500">{oracleError}</span>
+            ) : (
+              <span>{claimable !== null ? claimable : 'N/A'}</span>
+            )}
+            <span className="ml-2 text-xs text-gray-400">Refreshing in {refreshCountdown}s</span>
+          </div>
+          <div>
+            <span className="font-semibold">Lifetime Rewards (oracle): </span>
+            {oracleLoading ? (
+              <span>Loading...</span>
+            ) : oracleError ? (
+              <span className="text-red-500">{oracleError}</span>
+            ) : (
+              <span>{oracleLifetimeRewards !== null ? oracleLifetimeRewards : 'N/A'}</span>
+            )}
           </div>
           <Button onClick={() => claimRewardsMutation.mutate()} disabled={claimRewardsMutation.isPending}>
             {claimRewardsMutation.isPending ? 'Claiming...' : 'Claim Rewards'}

@@ -17,9 +17,7 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
-  getSavedDeviceKeypairs,
   saveDeviceKeypair,
-  removeDeviceKeypair,
   importDeviceKeypair,
   exportDeviceKeypair,
 } from '@/lib/device-keypair-storage'

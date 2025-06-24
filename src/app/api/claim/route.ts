@@ -97,7 +97,6 @@ export async function POST(req: NextRequest) {
     // 5. Sign the message with the oracle's key
     const signature = nacl.sign.detached(message, oracleKeypair.secretKey)
 
-
     await writeDb(db)
 
     // 6. Return the signature and other necessary data
@@ -111,4 +110,20 @@ export async function POST(req: NextRequest) {
     console.error(error)
     return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 })
   }
+}
+
+// Add GET endpoint to fetch last 10 data points for a device
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url)
+  const devicePublicKey = searchParams.get('devicePublicKey')
+  if (!devicePublicKey) {
+    return NextResponse.json({ error: 'Missing devicePublicKey' }, { status: 400 })
+  }
+  const db = await readDb()
+  const device = db.devices[devicePublicKey]
+  if (!device) {
+    return NextResponse.json({ data: [] })
+  }
+  const last10 = device.data.slice(-10).reverse()
+  return NextResponse.json({ data: last10 })
 }

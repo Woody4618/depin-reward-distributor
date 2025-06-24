@@ -33,6 +33,12 @@ function DeviceCard({
   const [hasKeypair, setHasKeypair] = useState(false)
   const [importValue, setImportValue] = useState('')
   const [importError, setImportError] = useState<string | null>(null)
+  const [expanded, setExpanded] = useState(false)
+  const [deviceData, setDeviceData] = useState<{ temperature: number; humidity: number; receivedAt: string }[] | null>(
+    null,
+  )
+  const [deviceDataLoading, setDeviceDataLoading] = useState(false)
+  const [deviceDataError, setDeviceDataError] = useState<string | null>(null)
 
   // Fetch oracle rewards for this device
   const fetchOracleRewards = async (devicePubkey: string) => {
@@ -78,6 +84,54 @@ function DeviceCard({
     claimable = Math.max(0, oracleLifetimeRewards - Number(accountQuery.data.totalClaimed))
   }
 
+  // Fetch device data when expanded
+  useEffect(() => {
+    if (!expanded) return
+    const fetchDeviceData = async () => {
+      setDeviceDataLoading(true)
+      setDeviceDataError(null)
+      try {
+        const res = await fetch(`/api/claim?devicePublicKey=${account.account.devicePubkey.toBase58()}`)
+        if (!res.ok) {
+          const err = await res.json()
+          setDeviceDataError(err.error || 'Failed to fetch device data')
+          setDeviceData(null)
+        } else {
+          const data = await res.json()
+          setDeviceData(data.data)
+        }
+      } catch {
+        setDeviceDataError('Failed to fetch device data')
+        setDeviceData(null)
+      } finally {
+        setDeviceDataLoading(false)
+      }
+    }
+    fetchDeviceData()
+  }, [expanded, account.account.devicePubkey])
+
+  // Helper to refetch device data
+  const refetchDeviceData = async () => {
+    setDeviceDataLoading(true)
+    setDeviceDataError(null)
+    try {
+      const res = await fetch(`/api/claim?devicePublicKey=${account.account.devicePubkey.toBase58()}`)
+      if (!res.ok) {
+        const err = await res.json()
+        setDeviceDataError(err.error || 'Failed to fetch device data')
+        setDeviceData(null)
+      } else {
+        const data = await res.json()
+        setDeviceData(data.data)
+      }
+    } catch {
+      setDeviceDataError('Failed to fetch device data')
+      setDeviceData(null)
+    } finally {
+      setDeviceDataLoading(false)
+    }
+  }
+
   // Ping Oracle handler
   const handlePingOracle = async () => {
     if (!accountQuery.data) return
@@ -115,6 +169,10 @@ function DeviceCard({
         setOracleError(null)
         // Immediately refetch oracle rewards after a successful ping
         await fetchOracleRewards(accountQuery.data.devicePubkey.toBase58())
+        // Also refetch device data if expanded
+        if (expanded) {
+          await refetchDeviceData()
+        }
       }
     } catch {
       setOracleError('Ping failed')
@@ -190,6 +248,41 @@ function DeviceCard({
         <Button onClick={handlePingOracle} disabled={pingLoading || !hasKeypair} variant="secondary">
           {pingLoading ? 'Pinging...' : 'Simulate Device Data sending to oracle'}
         </Button>
+      </div>
+      <div>
+        <button className="text-blue-600 hover:underline text-sm mt-2" onClick={() => setExpanded((v) => !v)}>
+          {expanded ? 'Hide Device Data' : 'Show Last 10 Device Data'}
+        </button>
+        {expanded && (
+          <div className="mt-2">
+            {deviceDataLoading ? (
+              <div>Loading device data...</div>
+            ) : deviceDataError ? (
+              <div className="text-red-500 text-xs">{deviceDataError}</div>
+            ) : deviceData && deviceData.length > 0 ? (
+              <table className="w-full text-xs border mt-2">
+                <thead>
+                  <tr>
+                    <th className="border px-2 py-1">Time</th>
+                    <th className="border px-2 py-1">Temperature</th>
+                    <th className="border px-2 py-1">Humidity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deviceData.map((d, i) => (
+                    <tr key={i}>
+                      <td className="border px-2 py-1">{new Date(d.receivedAt).toLocaleString()}</td>
+                      <td className="border px-2 py-1">{d.temperature}</td>
+                      <td className="border px-2 py-1">{d.humidity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-gray-500 text-xs">No data found for this device.</div>
+            )}
+          </div>
+        )}
       </div>
     </li>
   )

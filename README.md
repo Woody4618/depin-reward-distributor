@@ -16,7 +16,7 @@ All the sensor is stored of chain in a data base and only the reward data is sav
 
 <img width="993" alt="image" src="https://github.com/user-attachments/assets/d4b4751c-8709-4ce4-9459-80803a445206" />
 
-This is how this flow looks like in the web app that you can start using `yarn dev`: 
+This is how this flow looks like in the web app that you can start using `pnpm dev`: 
 Create of claim a physical device: 
 
 <img width="1108" height="868" alt="image" src="https://github.com/user-attachments/assets/d030ea06-b498-4187-9b13-ebe4db9dbb67" />

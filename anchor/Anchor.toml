@@ -8,6 +8,13 @@ skip-lint = false
 
 [programs.localnet]
 reward_distributor = "DGorXzr4L3QetxW6AbD715pt7e5ihU3RXo8Re5D7zNmu"
+metadata = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+
+[test.validator]
+url = "https://api.devnet.solana.com"
+
+[[test.validator.clone]]
+address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 
 [registry]
 url = "https://api.apr.dev"

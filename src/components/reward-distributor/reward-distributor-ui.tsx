@@ -444,7 +444,7 @@ export function DeviceCreateFeature() {
         </div>
         {/* Claim Device via Pi section */}
         <div className="p-4 border rounded-md space-y-4">
-          <h2 className="text-lg font-bold">3. Claim Device via Raspberry Pi</h2>
+          <h2 className="text-lg font-bold">Or claim Device via Raspberry Pi local Web service</h2>
           <p className="text-sm text-gray-500">
             If you have a real device running the Pi server, you can claim it here.
           </p>

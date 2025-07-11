@@ -246,8 +246,8 @@ function DeviceCard({
       </div>
       {!hasKeypair && (
         <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 rounded mt-2">
-          Device keypair not found in this browser, so its probably on the Raspberry Pi. You can import it to also call
-          the ping from here. But its better if the keypair never leaves the Pi.
+          Device keypair not found in this browser, so its probably on the Hardware device. You can import it to also call
+          the sensor ping from here. But its better if the keypair never leaves the Device.
           <div className="mt-2 flex gap-2">
             <input
               className="border rounded px-2 py-1 text-xs"

@@ -1,7 +1,7 @@
 # DePIN Reward Distributor
 
 A full-stack Solana dApp for distributed, oracle-verified rewards.
-This specific examples is collecting Temperature and Humidity data from a Raspberry Pi and rewards the user for as long as new Data is send from the device.
+This specific examples is collecting Temperature and Humidity data from a Raspberry Pi and rewards the user for as long as new Data is send from the device. Like this we could get a global average of home heating habits of people around the world. 
 
 The cost of the Setup comes down to 0.00144768 per device on chain reward account.
 This cost can either be payed by the Hardware issuer when the device identity keypair is created or the the user of the device. Depending on your needs.
@@ -32,6 +32,7 @@ All the sensor is stored of chain in a data base and only the reward data is sav
 2. In this example app it is possible to create a new device keypair in the webapp and claim any keypair. For production you would want to permission the creation of these keys. You can for example to that by adding an admin key to the program that is the only account that is allowed to create new reward accounts.
 3. In this example the device can theoretically send as many sensor pings as it wants and thus get unlimited rewards. As the device is in the users hands, we can not 100% be sure that the device is not sending wrong data. Depending on your project you would probably want to limit the sensor rewards per day, per device or even limit the total amount of rewards per device.
 4. For this test project the oracle keypair is saved in the project root. In a production environment you would want to save the oracle keypair in a safe place and not check it into version control.
+
 
 ---
 

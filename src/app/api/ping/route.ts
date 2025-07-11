@@ -56,6 +56,22 @@ export async function POST(req: NextRequest) {
     const signatureBytes = bs58.decode(signature)
     const publicKeyBytes = new PublicKey(devicePublicKey).toBuffer()
 
+    // Validate temperature and humidity. Depending on the project this
+    // could be much more serious and maybe also slash the device reward in case or malicious data
+    if (
+      typeof data.temperature !== 'number' ||
+      typeof data.humidity !== 'number' ||
+      data.temperature < -100 ||
+      data.temperature > 80 ||
+      data.humidity < 0 ||
+      data.humidity > 100
+    ) {
+      return NextResponse.json(
+        { error: 'Invalid sensor data: temperature must be between -100 and 80, humidity between 0 and 100.' },
+        { status: 400 },
+      )
+    }
+
     const isVerified = nacl.sign.detached.verify(message, signatureBytes, publicKeyBytes)
 
     if (!isVerified) {

@@ -6,6 +6,7 @@ import { createMint, getOrCreateAssociatedTokenAccount, mintTo, getAccount, TOKE
 import nacl from 'tweetnacl'
 import fs from 'fs'
 import path from 'path'
+import { createCreateMetadataAccountV3Instruction } from '@metaplex-foundation/mpl-token-metadata'
 
 describe('reward-distributor', () => {
   // Configure the client to use the local cluster.
@@ -25,7 +26,7 @@ describe('reward-distributor', () => {
   const anotherAuthorityKeypair = Keypair.generate()
 
   // Mints and Token Accounts
-  let usdcMint: PublicKey
+  let usdgMint: PublicKey
   let userTokenAccount: PublicKey
   let treasuryTokenAccount: PublicKey
 
@@ -41,8 +42,8 @@ describe('reward-distributor', () => {
     await provider.connection.requestAirdrop(newAuthorityKeypair.publicKey, LAMPORTS_PER_SOL)
     await provider.connection.requestAirdrop(anotherAuthorityKeypair.publicKey, LAMPORTS_PER_SOL)
 
-    // Create USDC Mint
-    usdcMint = await createMint(
+    // Create USDG Mint
+    usdgMint = await createMint(
       provider.connection,
       wallet.payer,
       wallet.publicKey,
@@ -51,11 +52,45 @@ describe('reward-distributor', () => {
       usdcMintKeypair,
     )
 
+    // Add Metaplex metadata to the mint
+    const TOKEN_METADATA_PROGRAM_ID = new anchor.web3.PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s')
+    const [metadataPDA] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('metadata'), TOKEN_METADATA_PROGRAM_ID.toBuffer(), usdgMint.toBuffer()],
+      TOKEN_METADATA_PROGRAM_ID,
+    )
+    const metadataData = {
+      name: 'USDG Example',
+      symbol: 'USDGX',
+      uri: 'https://arweave.net/your-metadata.json', // Replace with your actual metadata URI
+      sellerFeeBasisPoints: 0,
+      creators: null,
+      collection: null,
+      uses: null,
+    }
+    const createMetadataIx = createCreateMetadataAccountV3Instruction(
+      {
+        metadata: metadataPDA,
+        mint: usdgMint,
+        mintAuthority: wallet.publicKey,
+        payer: wallet.publicKey,
+        updateAuthority: wallet.publicKey,
+      },
+      {
+        createMetadataAccountArgsV3: {
+          data: metadataData,
+          isMutable: true,
+          collectionDetails: null,
+        },
+      },
+    )
+    const tx = new anchor.web3.Transaction().add(createMetadataIx)
+    await provider.sendAndConfirm(tx, [])
+
     // Create User's Associated Token Account
     const userAta = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       wallet.payer,
-      usdcMint,
+      usdgMint,
       wallet.publicKey,
     )
     userTokenAccount = userAta.address
@@ -64,7 +99,7 @@ describe('reward-distributor', () => {
     const treasuryAta = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       wallet.payer,
-      usdcMint,
+      usdgMint,
       treasuryAuthorityPDA,
       true, // Allow owner to be off-curve (i.e. a PDA)
     )
@@ -74,7 +109,7 @@ describe('reward-distributor', () => {
     await mintTo(
       provider.connection,
       wallet.payer,
-      usdcMint,
+      usdgMint,
       treasuryTokenAccount,
       wallet.payer,
       1_000_000_000, // 1,000 USDC
@@ -177,7 +212,7 @@ describe('reward-distributor', () => {
         rewardAccount: rewardAccountPda,
         user: wallet.publicKey,
         oracle: oracleKeypair.publicKey,
-        mint: usdcMint,
+        mint: usdgMint,
         treasuryTokenAccount: treasuryTokenAccount,
         tokenProgram: TOKEN_PROGRAM_ID,
       })

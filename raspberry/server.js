@@ -82,7 +82,7 @@ app.post('/api/sign-claim', (req, res) => {
   }
   const keypair = nacl.sign.keyPair.fromSecretKey(secretKey)
   // Message: devicePubkey + userPubkey (both as base58 strings, concatenated)
-  const message = Buffer.from(keypair.publicKey.toString() + userPublicKey)
+  const message = Buffer.from(`I want to claim: ${userPublicKey}`)
   const signature = nacl.sign.detached(message, keypair.secretKey)
   res.json({
     devicePublicKey: bs58.encode(keypair.publicKey),

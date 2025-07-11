@@ -94,10 +94,17 @@ pub mod reward_distributor {
         let ed25519_ix_index = current_ix_index - 1;
         let ed25519_ix = load_instruction_at_checked(ed25519_ix_index, ixs)?;
 
-        require_keys_eq!(
-            ed25519_ix.program_id,
-            ED25519_ID,
-            ErrorCode::InvalidInstruction
+        // Use the device_pubkey from the reward_account as the expected signer
+        let expected_device_pubkey = ctx.accounts.reward_account.device_pubkey;
+        let message = verify_ed25519_ix(&ed25519_ix, expected_device_pubkey.as_ref())?;
+        msg!("Device Ed25519 message extracted: {:?}", &message);
+
+        // Check that the message matches the expected format
+        // For example, if your message is: "I want to claim: <new_authority_pubkey>"
+        let expected_msg = format!("I want to claim: {}", ctx.accounts.new_authority.key());
+        require!(
+            message == expected_msg.as_bytes(),
+            ErrorCode::InvalidSignature
         );
 
         let reward_account = &mut ctx.accounts.reward_account;

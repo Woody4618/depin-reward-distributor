@@ -14,6 +14,9 @@ All the sensor is stored of chain in a data base and only the reward data is sav
 - **Raspberry Pi**: Reads sensor data, signs it with a device key, and reports to the oracle API.
 - **Oracle**: Signs reward data and exposes an API for the Pi and web app to interact with.
 
+<img width="993" alt="image" src="https://github.com/user-attachments/assets/d4b4751c-8709-4ce4-9459-80803a445206" />
+
+
 ---
 
 ## Reward Claim Flow

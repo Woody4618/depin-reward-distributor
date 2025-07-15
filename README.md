@@ -71,7 +71,7 @@ Assuming a reward distribution to 10,000 users, with an average reward amount pe
 
 In this example we only use the non compressed version and save the claimed amount directly in a Solana Account. There are implementations out there for compression. 
 Notably: 
-[Jito Reward Distributor](https://github.com/jito-foundation/distributor) or the [Jupiter Distributor](https://github.com/jup-ag/merkle-distributor-sdk) 
+[Jito Reward Distributor](https://github.com/jito-foundation/distributor), the [Jupiter Distributor](https://github.com/jup-ag/merkle-distributor-sdk) or even ready made tools like [Helius AirShip](https://www.helius.dev/docs/airship/getting-started#build-from-source). 
 
 ### Cost Extrapolation Across Different Numbers of Reward Distributions
 The following table extrapolates storage costs for different numbers of reward distributions:

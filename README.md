@@ -121,6 +121,51 @@ IMPORTANT: The oracle keypair should not be used in production. It is only for t
 
 ---
 
+### 6. Cost 
+
+#### Reward Distribution Cost Analysis
+
+Assuming a reward distribution to 10,000 users, with an average reward amount per user of 100 tokens, and a transaction fee on Solana of 0.000007 SOL (7,000 lamports), the storage costs for different distribution strategies are as follows:
+
+#### Storage Costs Using Merkle Tree Distribution Strategy
+- The Merkle tree requires storing the leaf nodes and the internal nodes.
+- **Leaf Nodes**: 10,000 * 32 bytes = 320,000 bytes
+- **Internal Nodes**: (2^14 - 1) * 32 bytes = 524,256 bytes
+- **Total Storage Cost**: (320,000 + 524,256) * 0.00000348 SOL/byte (per epoch) = 2.94 SOL
+- **Total Cost (Merkle Tree)**: 0.050005 SOL + 0.00007323 SOL + 2.94 SOL = **2.99 SOL**
+
+#### Storage Costs Using ZK Compression Distribution Strategy
+- The compressed token account stores the compressed reward data.
+- **Compressed Data Size**: Assuming a compression ratio of 50%, the total compressed data size is approximately 500 KB.
+- **Total Storage Cost**: 500 * 1024 * 0.00000348 SOL/byte (per epoch) = 1.78 SOL
+- **Total Cost (ZK Compression)**: 0.050005 SOL + 0.00000223 SOL + 1.78 SOL = **1.83 SOL**
+
+#### Storage Costs Without Compression
+- Saving the claimed amount in a normal Solana account state.
+- **Data Size**: Saving authority, device pubkey, and claimed amount requires 72 bytes, resulting in 0.001392 SOL in rent cost per account.
+- **Note**: This approach does not scale well for large networks but has less complexity, and costs can theoretically be distributed to users.
+
+#### Cost Extrapolation Across Different Numbers of Reward Distributions
+The following table extrapolates storage costs for different numbers of reward distributions:
+
+| Number of Distributions | Merkle Tree Storage Cost (SOL) | ZK Compression Storage Cost (SOL) | No Compression (SOL) |
+|-------------------------|-------------------------------|----------------------------------|----------------------|
+| 1,000                   | 0.06                          | 0.03                             | 1.392                |
+| 10,000                  | 0.58                          | 0.29                             | 13.92                |
+| 100,000                 | 5.80                          | 2.90                             | 139.2                |
+| 1,000,000               | 58.00                         | 29.00                            | 1392                 |
+| 5,000,000               | 290.00                        | 145.00                           | 6960                 |
+
+| Number of Distributions | Merkle Tree Storage Cost (SOL) | ZK Compression Storage Cost (SOL) | No Compression (SOL) |
+|-------------------------|-------------------------------|----------------------------------|----------------------|
+| 1,000                   | 0.06                          | 0.03                             | 1.392                |
+| 10,000                  | 0.58                          | 0.29                             | 13.92                |
+| 100,000                 | 5.80                          | 2.90                             | 139.2                |
+| 1,000,000               | 58.00                         | 29.00                            | 1392                 |
+| 5,000,000               | 290.00                        | 145.00                           | 6960                 |
+
+
+
 ## Contributing
 
 - PRs and issues welcome!

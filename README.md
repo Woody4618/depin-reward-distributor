@@ -179,9 +179,9 @@ IMPORTANT: The oracle keypair should not be used in production. It is only for t
 This guide is roughly based on how Helium does their reward distribution. Just without the cNFTs. 
 If you want to check out the actual in production implementation of Helium here are some links: 
 
-Distributor oracle: https://github.com/helium/helium-program-library/tree/master/packages/distributor-oracle 
-Lazy distributor: https://github.com/helium/helium-program-library/tree/master/programs/lazy-distributor 
-Claiming rewards: https://docs.helium.com/solana/rewardable-entites/#claiming-rewards-on-rewardable-entities
+- Distributor oracle: https://github.com/helium/helium-program-library/tree/master/packages/distributor-oracle 
+- Lazy distributor: https://github.com/helium/helium-program-library/tree/master/programs/lazy-distributor 
+- Claiming rewards: https://docs.helium.com/solana/rewardable-entites/#claiming-rewards-on-rewardable-entities
 
 ## Contributing
 

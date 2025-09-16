@@ -1,6 +1,6 @@
 # DePIN Reward Distributor
 
-[Video Walktrhough](https://www.youtube.com/watch?v=OyVvdj2qkdg&ab_channel=JonasHahn)
+[Video Walkthrough](https://www.youtube.com/watch?v=OyVvdj2qkdg&ab_channel=JonasHahn)
 
 A full-stack Solana dApp for distributed, oracle-verified rewards.
 This specific examples is collecting Temperature and Humidity data from a Raspberry Pi and rewards the user for as long as new Data is send from the device. Like this we could get a global average of home heating habits of people around the world. 
